@@ -6,11 +6,11 @@
   tags:
     - facts
 
-- name: Set os_family fact for Kylin Linux Advanced Server
+- name: Set os_family fact for Kylin Linux Advanced Server and openEuler
   set_fact:
     ansible_os_family: "RedHat"
     ansible_distribution_major_version: "8"
-  when: ansible_distribution == "Kylin Linux Advanced Server"
+  when: ansible_distribution in ["Kylin Linux Advanced Server", "openEuler"]
   tags:
     - facts
 
@@ -203,7 +203,7 @@
     nameserverentries: |-
       {{ (([nodelocaldns_ip] if enable_nodelocaldns else []) + (coredns_server|d([]) if not enable_nodelocaldns else []) + nameservers|d([]) + cloud_resolver|d([]) + (configured_nameservers|d([]) if not disable_host_nameservers|d()|bool else [])) | unique | join(',') }}
     supersede_nameserver:
-      supersede domain-name-servers {{ ( ( [nodelocaldns_ip] if enable_nodelocaldns else []) + coredns_server|d([]) + nameservers|d([]) + cloud_resolver|d([])) | unique | join(', ') }};
+      supersede domain-name-servers {{ ( ( [nodelocaldns_ip] if enable_nodelocaldns else []) + (coredns_server|d([]) if not enable_nodelocaldns else []) + nameservers|d([]) + cloud_resolver|d([])) | unique | join(', ') }};
   when: not dns_early or dns_late
 
 # This task should run instead of the above task when cluster/nodelocal DNS hasn't
